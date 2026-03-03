@@ -7,6 +7,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\BarangController;
 
 Auth::routes(['register' => false]);
 
@@ -62,6 +63,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/pdf/undangan', [PdfController::class, 'undangan'])
         ->name('pdf.undangan');
+
+    // ========================================
+    // BARANG (Tag Harga UMKM)
+    // ========================================
+    Route::post('barang/cetak-pdf', [BarangController::class, 'cetakPdf'])
+        ->name('barang.cetakPdf');
+
+    Route::resource('barang', BarangController::class)
+        ->except(['show', 'create', 'edit']);
 });
 
 // ══════════════════════════════════════════

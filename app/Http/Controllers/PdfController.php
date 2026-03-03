@@ -67,7 +67,7 @@ class PdfController extends Controller
             'judul_acara' => 'Pelatihan ORM & Mendeley untuk Pengelolaan Referensi Perpustakaan',
             'kepada_instansi' => 'Universitas Airlangga',
             'hari_tanggal' => 'Sabtu, 28 Februari 2026',
-            'waktu' => '08.00 – 16.00 WIB',
+            'waktu' => '09.00 – 16.00 WIB',
             'tempat' => 'Ruang Seminar Perpustakaan Lt. 2 – Universitas Airlangga',
             'materi' => 'ORM dengan Eloquent Laravel & Manajemen Referensi menggunakan Mendeley',
             'narasumber' => 'Dr. Budi Santoso, M.Kom',

@@ -55,5 +55,13 @@
             </a>
         </li>
 
+        {{-- TAG HARGA --}}
+        <li class="nav-item {{ request()->routeIs('barang.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('barang.index') }}">
+                <span class="menu-title">Tag Harga</span>
+                <i class="mdi mdi-tag-outline menu-icon"></i>
+            </a>
+        </li>
+
     </ul>
 </nav>
