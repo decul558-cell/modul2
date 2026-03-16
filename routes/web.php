@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
@@ -16,7 +15,6 @@ Auth::routes(['register' => false]);
 // ============================================
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])
     ->name('google.login');
-
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])
     ->name('google.callback');
 
@@ -26,7 +24,6 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::get('/verifikasi-otp', function () {
     return view('auth.otp');
 })->name('otp.form');
-
 Route::post('/verifikasi-otp', [AuthController::class, 'verifyOtp'])
     ->name('otp.verify');
 
@@ -41,16 +38,12 @@ Route::get('/', function () {
 // SEMUA USER LOGIN
 // ══════════════════════════════════════════
 Route::middleware('auth')->group(function () {
-
     Route::get('/dashboard', [HomeController::class, 'index'])
         ->name('dashboard');
-
     Route::get('/kategori', [KategoriController::class, 'index'])
         ->name('kategori.index');
-
     Route::get('/buku', [BukuController::class, 'index'])
         ->name('buku.index');
-
     Route::get('/profile', function () {
         return view('profile.index');
     })->name('profile');
@@ -60,7 +53,6 @@ Route::middleware('auth')->group(function () {
     // ========================================
     Route::get('/pdf/sertifikat', [PdfController::class, 'sertifikat'])
         ->name('pdf.sertifikat');
-
     Route::get('/pdf/undangan', [PdfController::class, 'undangan'])
         ->name('pdf.undangan');
 
@@ -69,19 +61,34 @@ Route::middleware('auth')->group(function () {
     // ========================================
     Route::post('barang/cetak-pdf', [BarangController::class, 'cetakPdf'])
         ->name('barang.cetakPdf');
-
     Route::resource('barang', BarangController::class)
         ->except(['show', 'create', 'edit']);
+
+    // ========================================
+    // JS & JQUERY - Nomor 2
+    // ========================================
+    Route::get('/js-tabel-biasa', function () {
+        return view('js.tabel_biasa');
+    })->name('js.tabel_biasa');
+
+    Route::get('/js-tabel-datatables', function () {
+        return view('js.tabel_datatables');
+    })->name('js.tabel_datatables');
+
+    // ========================================
+    // JS & JQUERY - Nomor 4
+    // ========================================
+    Route::get('/js-select', function () {
+        return view('js.select');
+    })->name('js.select');
 });
 
 // ══════════════════════════════════════════
 // ADMIN ONLY
 // ══════════════════════════════════════════
 Route::middleware(['auth', 'admin'])->group(function () {
-
     Route::resource('kategori', KategoriController::class)
         ->except(['index', 'show']);
-
     Route::resource('buku', BukuController::class)
         ->except(['index', 'show']);
 });

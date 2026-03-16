@@ -63,5 +63,21 @@
             </a>
         </li>
 
+        {{-- TABEL BIASA --}}
+        <li class="nav-item {{ request()->routeIs('js.tabel_biasa') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('js.tabel_biasa') }}">
+                <span class="menu-title">Tabel Biasa</span>
+                <i class="mdi mdi-table menu-icon"></i>
+            </a>
+        </li>
+
+        {{-- TABEL DATATABLES --}}
+        <li class="nav-item {{ request()->routeIs('js.tabel_datatables') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('js.tabel_datatables') }}">
+                <span class="menu-title">Tabel DataTables</span>
+                <i class="mdi mdi-table-search menu-icon"></i>
+            </a>
+        </li>
+
     </ul>
 </nav>
