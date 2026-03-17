@@ -7,6 +7,7 @@ use App\Http\Controllers\BukuController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\WilayahController;
 
 Auth::routes(['register' => false]);
 
@@ -81,6 +82,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/js-select', function () {
         return view('js.select');
     })->name('js.select');
+
+    // ========================================
+    // AJAX & AXIOS - Nomor 1 Wilayah (halaman)
+    // ========================================
+    Route::get('/js-wilayah-ajax', function () {
+        return view('js.wilayah_ajax');
+    })->name('js.wilayah_ajax');
+
+    Route::get('/js-wilayah-axios', function () {
+        return view('js.wilayah_axios');
+    })->name('js.wilayah_axios');
+
+    // ========================================
+    // AJAX & AXIOS - Wilayah API endpoints
+    // ========================================
+    Route::get('/api/provinsi', [WilayahController::class, 'provinsi'])->name('api.provinsi');
+    Route::get('/api/kota/{id}', [WilayahController::class, 'kota'])->name('api.kota');
+    Route::get('/api/kecamatan/{id}', [WilayahController::class, 'kecamatan'])->name('api.kecamatan');
+    Route::get('/api/kelurahan/{id}', [WilayahController::class, 'kelurahan'])->name('api.kelurahan');
 });
 
 // ══════════════════════════════════════════
@@ -98,4 +118,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // ============================================
 Route::fallback(function () {
     return redirect()->route('dashboard');
+});
+// POS
+Route::middleware('auth')->group(function () {
+    Route::get('/pos', [App\Http\Controllers\PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos/cari-barang', [App\Http\Controllers\PosController::class, 'cariBarang'])->name('pos.cari');
+    Route::post('/pos/bayar', [App\Http\Controllers\PosController::class, 'bayar'])->name('pos.bayar');
 });

@@ -79,5 +79,37 @@
             </a>
         </li>
 
+        {{-- SELECT & SELECT2 --}}
+        <li class="nav-item {{ request()->routeIs('js.select') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('js.select') }}">
+                <span class="menu-title">Select & Select2</span>
+                <i class="mdi mdi-form-select menu-icon"></i>
+            </a>
+        </li>
+
+        {{-- WILAYAH AJAX --}}
+        <li class="nav-item {{ request()->routeIs('js.wilayah_ajax') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('js.wilayah_ajax') }}">
+                <span class="menu-title">Wilayah Ajax</span>
+                <i class="mdi mdi-map-marker menu-icon"></i>
+            </a>
+        </li>
+
+        {{-- WILAYAH AXIOS --}}
+        <li class="nav-item {{ request()->routeIs('js.wilayah_axios') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('js.wilayah_axios') }}">
+                <span class="menu-title">Wilayah Axios</span>
+                <i class="mdi mdi-map-marker-outline menu-icon"></i>
+            </a>
+        </li>
+
+        {{-- POS / KASIR --}}
+        <li class="nav-item {{ request()->routeIs('pos.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('pos.index') }}">
+                <span class="menu-title">Point of Sales</span>
+                <i class="mdi mdi-cash-register menu-icon"></i>
+            </a>
+        </li>
+
     </ul>
 </nav>
