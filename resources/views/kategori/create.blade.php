@@ -20,31 +20,43 @@
                     </div>
                 @endif
 
-                <form action="{{ route('kategori.store') }}" method="POST">
+                <form id="formTambahKategori" action="{{ route('kategori.store') }}" method="POST">
                     @csrf
 
                     <div class="form-group">
                         <label>Nama Kategori</label>
-                        <input type="text" 
-                               name="nama_kategori" 
+                        <input type="text"
+                               name="nama_kategori"
                                class="form-control"
-                               value="{{ old('nama_kategori') }}">
+                               value="{{ old('nama_kategori') }}" required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        Simpan
-                    </button>
-
-                    <a href="{{ route('kategori.index') }}" 
-                       class="btn btn-secondary">
-                        Kembali
-                    </a>
-
                 </form>
+
+                <button type="button" id="btnSimpanKategori" class="btn btn-primary" onclick="submitForm('formTambahKategori', 'btnSimpanKategori')">
+                    Simpan
+                </button>
+                <a href="{{ route('kategori.index') }}" class="btn btn-secondary">Kembali</a>
 
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function submitForm(formId, btnId) {
+    const form = document.getElementById(formId);
+    const btn  = document.getElementById(btnId);
+
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Memproses...';
+    form.submit();
+}
+</script>
 
 @endsection
