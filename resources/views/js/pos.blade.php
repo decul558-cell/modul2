@@ -32,6 +32,36 @@
                     </button>
                 </div>
             </div>
+
+            {{-- PILIH METODE PEMBAYARAN --}}
+            <div class="card shadow-sm border-0 rounded-4 mt-4">
+                <div class="card-header bg-white border-bottom fw-semibold text-primary">
+                    <i class="fas fa-wallet me-2"></i>Metode Pembayaran
+                </div>
+                <div class="card-body d-flex flex-column gap-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod"
+                               id="pmTunai" value="tunai" checked>
+                        <label class="form-check-label fw-semibold" for="pmTunai">
+                            💵 Tunai
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod"
+                               id="pmVA" value="virtual_account">
+                        <label class="form-check-label fw-semibold" for="pmVA">
+                            🏦 Virtual Account <small class="text-muted">(BCA, BNI, BRI, Mandiri)</small>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod"
+                               id="pmQRIS" value="qris">
+                        <label class="form-check-label fw-semibold" for="pmQRIS">
+                            📱 QRIS / GoPay
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- TABEL TRANSAKSI --}}
@@ -39,6 +69,9 @@
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-white border-bottom fw-semibold text-primary d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-shopping-cart me-2"></i>Keranjang Belanja</span>
+                    <a href="{{ route('pos.riwayat') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-history me-1"></i>Riwayat Transaksi
+                    </a>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered table-hover align-middle" id="tabelPOS">
@@ -81,35 +114,38 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('midtrans.client_key') }}"></script>
 
 <script>
-let hargaBarang  = 0;
-let namaBarang   = '';
-let kodeBarang   = '';
+let hargaBarang     = 0;
+let namaBarang      = '';
+let kodeBarang      = '';
+let idBarang        = null;
 let barangDitemukan = false;
 
-// Cari barang saat Enter ditekan
+// CARI BARANG
 document.getElementById('inputKode').addEventListener('keydown', function (e) {
     if (e.key !== 'Enter') return;
     const kode = this.value.trim();
     if (!kode) return;
 
-    // Reset
-    document.getElementById('inputNama').value  = '';
-    document.getElementById('inputHarga').value = '';
+    document.getElementById('inputNama').value   = '';
+    document.getElementById('inputHarga').value  = '';
     document.getElementById('inputJumlah').value = 1;
     document.getElementById('btnTambah').disabled = true;
     barangDitemukan = false;
 
     axios.post('{{ route("pos.cari") }}', {
-        kode: kode,
+        kode:   kode,
         _token: '{{ csrf_token() }}'
     })
     .then(function (res) {
-        const b = res.data.data;
+        const b     = res.data.data;
         namaBarang  = b.nama;
         hargaBarang = b.harga;
         kodeBarang  = b.id_barang;
+        idBarang    = b.id_barang;
         barangDitemukan = true;
 
         document.getElementById('inputNama').value  = b.nama;
@@ -122,7 +158,7 @@ document.getElementById('inputKode').addEventListener('keydown', function (e) {
     });
 });
 
-// Tambah item ke tabel
+// TAMBAH ITEM
 function tambahItem() {
     if (!barangDitemukan) return;
 
@@ -135,13 +171,12 @@ function tambahItem() {
 
     setTimeout(function () {
         const subtotal = hargaBarang * jumlah;
-
-        // Cek apakah kode sudah ada di tabel
         const existing = document.querySelector(`tr[data-kode="${kodeBarang}"]`);
+
         if (existing) {
-            const tdJumlah   = existing.querySelector('.td-jumlah');
-            const tdSubtotal = existing.querySelector('.td-subtotal');
-            const newJumlah  = parseInt(tdJumlah.querySelector('input').value) + jumlah;
+            const tdJumlah    = existing.querySelector('.td-jumlah');
+            const tdSubtotal  = existing.querySelector('.td-subtotal');
+            const newJumlah   = parseInt(tdJumlah.querySelector('input').value) + jumlah;
             const newSubtotal = hargaBarang * newJumlah;
             tdJumlah.querySelector('input').value = newJumlah;
             tdSubtotal.textContent = 'Rp ' + newSubtotal.toLocaleString('id-ID');
@@ -151,8 +186,9 @@ function tambahItem() {
             if (emptyRow) emptyRow.remove();
 
             const tr = document.createElement('tr');
-            tr.dataset.kode  = kodeBarang;
-            tr.dataset.harga = hargaBarang;
+            tr.dataset.kode     = kodeBarang;
+            tr.dataset.id       = idBarang;
+            tr.dataset.harga    = hargaBarang;
             tr.innerHTML = `
                 <td><code>${kodeBarang}</code></td>
                 <td>${namaBarang}</td>
@@ -173,20 +209,20 @@ function tambahItem() {
 
         updateTotal();
 
-        // Reset form
-        document.getElementById('inputKode').value  = '';
-        document.getElementById('inputNama').value  = '';
-        document.getElementById('inputHarga').value = '';
+        document.getElementById('inputKode').value   = '';
+        document.getElementById('inputNama').value   = '';
+        document.getElementById('inputHarga').value  = '';
         document.getElementById('inputJumlah').value = 1;
         barangDitemukan = false;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-plus me-2"></i>Tambahkan';
+        idBarang        = null;
+        btn.disabled    = true;
+        btn.innerHTML   = '<i class="fas fa-plus me-2"></i>Tambahkan';
         document.getElementById('inputKode').focus();
         document.getElementById('btnBayar').disabled = false;
     }, 300);
 }
 
-// Update subtotal saat jumlah diubah
+// UPDATE SUBTOTAL
 function updateSubtotal(input) {
     const tr       = input.closest('tr');
     const harga    = parseInt(tr.dataset.harga);
@@ -198,7 +234,7 @@ function updateSubtotal(input) {
     updateTotal();
 }
 
-// Hapus row
+// HAPUS ROW
 function hapusRow(btn) {
     btn.closest('tr').remove();
     if (document.getElementById('tbodyPOS').rows.length === 0) {
@@ -211,7 +247,7 @@ function hapusRow(btn) {
     updateTotal();
 }
 
-// Update total
+// UPDATE TOTAL
 function updateTotal() {
     let total = 0;
     document.querySelectorAll('.td-subtotal').forEach(function (td) {
@@ -220,51 +256,115 @@ function updateTotal() {
     document.getElementById('totalHarga').textContent = 'Rp ' + total.toLocaleString('id-ID');
 }
 
-// Bayar
+// RESET KERANJANG
+function resetKeranjang() {
+    document.getElementById('tbodyPOS').innerHTML =
+        '<tr id="emptyRow"><td colspan="6" class="text-center text-muted">Belum ada item</td></tr>';
+    document.getElementById('totalHarga').textContent = 'Rp 0';
+    document.getElementById('inputKode').value   = '';
+    document.getElementById('inputNama').value   = '';
+    document.getElementById('inputHarga').value  = '';
+    document.getElementById('inputJumlah').value = 1;
+    barangDitemukan = false;
+    idBarang        = null;
+    const btn = document.getElementById('btnBayar');
+    btn.disabled  = true;
+    btn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Bayar';
+}
+
+// BAYAR
 function bayar() {
     const rows = document.querySelectorAll('#tbodyPOS tr[data-kode]');
     if (rows.length === 0) return;
 
     const items = [];
-    let total = 0;
+    let total   = 0;
     rows.forEach(function (tr) {
         const jumlah   = parseInt(tr.querySelector('.td-jumlah input').value);
         const subtotal = parseInt(tr.querySelector('.td-subtotal').dataset.val);
         total += subtotal;
         items.push({
-            kode:     tr.dataset.kode,
-            jumlah:   jumlah,
-            subtotal: subtotal
+            id:  tr.dataset.id,
+            qty: jumlah,
         });
     });
 
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
     const btn = document.getElementById('btnBayar');
-    btn.disabled = true;
+    btn.disabled  = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
 
+    // TUNAI
+    if (paymentMethod === 'tunai') {
+        axios.post('{{ route("pos.bayar") }}', {
+            items:          items,
+            payment_method: 'tunai',
+            _token:         '{{ csrf_token() }}'
+        })
+        .then(function (res) {
+            Swal.fire({
+                icon:  'success',
+                title: 'Berhasil!',
+                html:  `Transaksi tunai berhasil!<br>
+                        <b>Order:</b> ${res.data.order_code}<br>
+                        <b>Customer:</b> ${res.data.customer}<br>
+                        <b>Total:</b> Rp ${parseInt(res.data.total).toLocaleString('id-ID')}`,
+            });
+            resetKeranjang();
+        })
+        .catch(function () {
+            Swal.fire('Error!', 'Transaksi gagal disimpan.', 'error');
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Bayar';
+        });
+        return;
+    }
+
+    // VIRTUAL ACCOUNT / QRIS
     axios.post('{{ route("pos.bayar") }}', {
-        items:  items,
-        total:  total,
-        _token: '{{ csrf_token() }}'
+        items:          items,
+        payment_method: paymentMethod,
+        _token:         '{{ csrf_token() }}'
     })
     .then(function (res) {
-        Swal.fire('Berhasil!', 'Transaksi berhasil disimpan.', 'success');
-
-        // Kosongkan semua
-        document.getElementById('tbodyPOS').innerHTML =
-            '<tr id="emptyRow"><td colspan="6" class="text-center text-muted">Belum ada item</td></tr>';
-        document.getElementById('totalHarga').textContent = 'Rp 0';
-        document.getElementById('inputKode').value  = '';
-        document.getElementById('inputNama').value  = '';
-        document.getElementById('inputHarga').value = '';
-        document.getElementById('inputJumlah').value = 1;
-        barangDitemukan = false;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Bayar';
+        snap.pay(res.data.snap_token, {
+            onSuccess: function (result) {
+                Swal.fire({
+                    icon:  'success',
+                    title: '✅ Pembayaran Berhasil!',
+                    html:  `<b>Order:</b> ${res.data.order_code}<br>
+                            <b>Customer:</b> ${res.data.customer}<br>
+                            <b>Total:</b> Rp ${parseInt(res.data.total).toLocaleString('id-ID')}`,
+                });
+                resetKeranjang();
+            },
+            onPending: function (result) {
+                Swal.fire({
+                    icon:  'info',
+                    title: '⏳ Menunggu Pembayaran',
+                    html:  `Order <b>${res.data.order_code}</b> menunggu pembayaran.`,
+                });
+                resetKeranjang();
+            },
+            onError: function (result) {
+                Swal.fire('❌ Gagal!', 'Pembayaran gagal. Silakan coba lagi.', 'error');
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Bayar';
+            },
+            onClose: function () {
+                Swal.fire({
+                    icon:  'warning',
+                    title: 'Popup Ditutup',
+                    text:  'Kamu menutup popup sebelum pembayaran selesai.',
+                });
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Bayar';
+            }
+        });
     })
-    .catch(function (err) {
-        Swal.fire('Error!', 'Transaksi gagal disimpan.', 'error');
-        btn.disabled = false;
+    .catch(function () {
+        Swal.fire('Error!', 'Gagal menghubungi server pembayaran.', 'error');
+        btn.disabled  = false;
         btn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Bayar';
     });
 }

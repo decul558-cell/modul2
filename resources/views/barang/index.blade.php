@@ -76,11 +76,23 @@
                     <span class="fw-semibold text-primary">
                         <i class="fas fa-tags me-2"></i>Data Barang
                     </span>
-                    <button id="btnCetakTerpilih" class="btn btn-success btn-sm d-none"
-                            data-bs-toggle="modal" data-bs-target="#modalCetak">
-                        <i class="fas fa-print me-1"></i>Cetak Terpilih
-                        (<span id="jumlahTerpilih">0</span>)
-                    </button>
+                    {{-- Tombol cetak — muncul kalau ada barang yang dicentang --}}
+                    <div id="btnGroupCetak" class="d-none d-flex gap-2">
+                        {{-- Tombol cetak tanpa barcode (lama) --}}
+                        <button class="btn btn-success btn-sm"
+                                data-bs-toggle="modal" data-bs-target="#modalCetak"
+                                onclick="setModeCetak('normal')">
+                            <i class="fas fa-print me-1"></i>Cetak
+                            (<span class="jumlahTerpilih">0</span>)
+                        </button>
+                        {{-- Tombol cetak DENGAN barcode (baru) --}}
+                        <button class="btn btn-dark btn-sm"
+                                data-bs-toggle="modal" data-bs-target="#modalCetak"
+                                onclick="setModeCetak('barcode')">
+                            <i class="fas fa-barcode me-1"></i>Cetak + Barcode
+                            (<span class="jumlahTerpilih">0</span>)
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <table id="tblBarang" class="table table-hover align-middle w-100">
@@ -203,7 +215,10 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-semibold"><i class="fas fa-print me-2"></i>Cetak Tag Harga</h5>
+                {{-- Judul berubah sesuai mode cetak --}}
+                <h5 class="modal-title fw-semibold" id="modalCetakTitle">
+                    <i class="fas fa-print me-2"></i>Cetak Tag Harga
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -266,7 +281,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-success" onclick="doCetak()">
+                <button type="button" class="btn btn-success" id="btnGeneratePdf" onclick="doCetak()">
                     <i class="fas fa-file-pdf me-2"></i>Generate PDF
                 </button>
             </div>
@@ -274,12 +289,20 @@
     </div>
 </div>
 
-{{-- Form hidden untuk submit cetak --}}
+{{-- Form hidden untuk cetak TANPA barcode --}}
 <form id="formCetak" method="POST" action="{{ route('barang.cetakPdf') }}" target="_blank">
     @csrf
     <input type="hidden" name="ids"    id="cetakIds">
     <input type="hidden" name="coordX" id="cetakX">
     <input type="hidden" name="coordY" id="cetakY">
+</form>
+
+{{-- Form hidden untuk cetak DENGAN barcode --}}
+<form id="formCetakBarcode" method="POST" action="{{ route('barang.cetakPdfBarcode') }}" target="_blank">
+    @csrf
+    <input type="hidden" name="ids"    id="cetakIdsBarcode">
+    <input type="hidden" name="coordX" id="cetakXBarcode">
+    <input type="hidden" name="coordY" id="cetakYBarcode">
 </form>
 
 @endsection
@@ -301,6 +324,24 @@ $(document).ready(function () {
     });
 });
 
+// ── Mode cetak: 'normal' atau 'barcode' ────────
+let modeCetak = 'normal';
+
+function setModeCetak(mode) {
+    modeCetak = mode;
+    if (mode === 'barcode') {
+        document.getElementById('modalCetakTitle').innerHTML =
+            '<i class="fas fa-barcode me-2"></i>Cetak Tag Harga + Barcode';
+        document.getElementById('btnGeneratePdf').innerHTML =
+            '<i class="fas fa-barcode me-2"></i>Generate PDF + Barcode';
+    } else {
+        document.getElementById('modalCetakTitle').innerHTML =
+            '<i class="fas fa-print me-2"></i>Cetak Tag Harga';
+        document.getElementById('btnGeneratePdf').innerHTML =
+            '<i class="fas fa-file-pdf me-2"></i>Generate PDF';
+    }
+}
+
 // ── Checkbox ──────────────────────────────────
 document.getElementById('checkAll').addEventListener('change', function () {
     document.querySelectorAll('.chk-barang').forEach(c => c.checked = this.checked);
@@ -312,8 +353,10 @@ document.querySelectorAll('.chk-barang').forEach(c =>
 
 function updateCetakBtn() {
     const n = document.querySelectorAll('.chk-barang:checked').length;
-    document.getElementById('jumlahTerpilih').textContent = n;
-    document.getElementById('btnCetakTerpilih').classList.toggle('d-none', n === 0);
+    // Update angka di kedua tombol
+    document.querySelectorAll('.jumlahTerpilih').forEach(el => el.textContent = n);
+    // Tampilkan/sembunyikan group tombol
+    document.getElementById('btnGroupCetak').classList.toggle('d-none', n === 0);
 }
 
 // ── Modal Edit ─────────────────────────────────
@@ -336,13 +379,12 @@ function confirmHapus(id, nama) {
 function updatePreview() {
     const x = Math.min(5, Math.max(1, parseInt(document.getElementById('inputX').value) || 1));
     const y = Math.min(8, Math.max(1, parseInt(document.getElementById('inputY').value) || 1));
-    const startIdx = (y - 1) * 5 + x; // 1-based nomor label
+    const startIdx = (y - 1) * 5 + x;
 
     document.getElementById('nomorLabel').textContent = startIdx;
 
     const checked = [...document.querySelectorAll('.chk-barang:checked')];
 
-    // Reset semua cell
     for (let r = 1; r <= 8; r++) {
         for (let c = 1; c <= 5; c++) {
             const el = document.getElementById(`mc-${r}-${c}`);
@@ -353,9 +395,8 @@ function updatePreview() {
         }
     }
 
-    // Warnai slot yang akan diisi
     checked.forEach((chk, i) => {
-        const slot = startIdx + i; // 1-based
+        const slot = startIdx + i;
         if (slot > 40) return;
         const r = Math.ceil(slot / 5);
         const c = slot - (r - 1) * 5;
@@ -368,7 +409,6 @@ function updatePreview() {
         el.textContent = chk.dataset.nama.substring(0, 4) + '..';
     });
 
-    // Update list terpilih
     const ul = document.getElementById('listTerpilih');
     ul.innerHTML = '';
     if (checked.length === 0) {
@@ -396,10 +436,23 @@ function doCetak() {
     const checked = [...document.querySelectorAll('.chk-barang:checked')];
     if (checked.length === 0) { alert('Pilih minimal 1 barang!'); return; }
 
-    document.getElementById('cetakIds').value = checked.map(c => c.value).join(',');
-    document.getElementById('cetakX').value   = document.getElementById('inputX').value;
-    document.getElementById('cetakY').value   = document.getElementById('inputY').value;
-    document.getElementById('formCetak').submit();
+    const ids    = checked.map(c => c.value).join(',');
+    const coordX = document.getElementById('inputX').value;
+    const coordY = document.getElementById('inputY').value;
+
+    if (modeCetak === 'barcode') {
+        // Submit ke route cetakPdfBarcode
+        document.getElementById('cetakIdsBarcode').value = ids;
+        document.getElementById('cetakXBarcode').value   = coordX;
+        document.getElementById('cetakYBarcode').value   = coordY;
+        document.getElementById('formCetakBarcode').submit();
+    } else {
+        // Submit ke route cetakPdf (lama)
+        document.getElementById('cetakIds').value = ids;
+        document.getElementById('cetakX').value   = coordX;
+        document.getElementById('cetakY').value   = coordY;
+        document.getElementById('formCetak').submit();
+    }
 
     bootstrap.Modal.getInstance(document.getElementById('modalCetak')).hide();
 }

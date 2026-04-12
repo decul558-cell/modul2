@@ -104,10 +104,18 @@
         </li>
 
         {{-- POS / KASIR --}}
-        <li class="nav-item {{ request()->routeIs('pos.*') ? 'active' : '' }}">
+        <li class="nav-item {{ request()->routeIs('pos.index') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('pos.index') }}">
                 <span class="menu-title">Point of Sales</span>
                 <i class="mdi mdi-cash-register menu-icon"></i>
+            </a>
+        </li>
+
+        {{-- RIWAYAT TRANSAKSI --}}
+        <li class="nav-item {{ request()->routeIs('pos.riwayat') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('pos.riwayat') }}">
+                <span class="menu-title">Riwayat Transaksi</span>
+                <i class="mdi mdi-history menu-icon"></i>
             </a>
         </li>
 
