@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\CustomerController; // ← SC3
 
 // =====================
 // AUTH
@@ -27,6 +29,7 @@ Route::post('/verifikasi-otp', [AuthController::class, 'verifyOtp'])->name('otp.
 // PROTECTED ROUTES
 // =====================
 Route::middleware('auth')->group(function () {
+
     Route::get('/', fn() => redirect()->route('dashboard'));
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
     Route::get('/profile', fn() => view('profile'))->name('profile');
@@ -62,6 +65,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/pdf/sertifikat', [PdfController::class, 'sertifikat'])->name('pdf.sertifikat');
     Route::get('/pdf/undangan', [PdfController::class, 'undangan'])->name('pdf.undangan');
 
+    // Customer (SC3)
+    Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('/customer/tambah-1', [CustomerController::class, 'create1'])->name('customer.create1');
+    Route::post('/customer/tambah-1', [CustomerController::class, 'store1'])->name('customer.store1');
+    Route::get('/customer/tambah-2', [CustomerController::class, 'create2'])->name('customer.create2');
+    Route::post('/customer/tambah-2', [CustomerController::class, 'store2'])->name('customer.store2');
+
     // JS Demo Pages
     Route::view('/js-select', 'js.select')->name('js.select');
     Route::view('/js-tabel-biasa', 'js.tabel_biasa')->name('js.tabel_biasa');
@@ -74,6 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/kota/{id}', [WilayahController::class, 'kota'])->name('api.kota');
     Route::get('/api/kecamatan/{id}', [WilayahController::class, 'kecamatan'])->name('api.kecamatan');
     Route::get('/api/kelurahan/{id}', [WilayahController::class, 'kelurahan'])->name('api.kelurahan');
+
 });
 
 // =====================

@@ -119,5 +119,37 @@
             </a>
         </li>
 
+        {{-- CUSTOMER (SC3) --}}
+        <li class="nav-item {{ request()->routeIs('customer.*') ? 'active' : '' }}">
+            <a class="nav-link" data-bs-toggle="collapse" href="#menuCustomer"
+               aria-expanded="{{ request()->routeIs('customer.*') ? 'true' : 'false' }}">
+                <span class="menu-title">Customer</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi-account-group menu-icon"></i>
+            </a>
+            <div class="collapse {{ request()->routeIs('customer.*') ? 'show' : '' }}" id="menuCustomer">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('customer.index') ? 'active' : '' }}"
+                           href="{{ route('customer.index') }}">
+                            Data Customer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('customer.create1') ? 'active' : '' }}"
+                           href="{{ route('customer.create1') }}">
+                            Tambah Customer 1
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('customer.create2') ? 'active' : '' }}"
+                           href="{{ route('customer.create2') }}">
+                            Tambah Customer 2
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
     </ul>
 </nav>

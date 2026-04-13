@@ -328,16 +328,23 @@ function bayar() {
     })
     .then(function (res) {
         snap.pay(res.data.snap_token, {
+
+            // ── SC2: Tampilkan QR Code setelah pembayaran berhasil ──
             onSuccess: function (result) {
                 Swal.fire({
                     icon:  'success',
                     title: '✅ Pembayaran Berhasil!',
                     html:  `<b>Order:</b> ${res.data.order_code}<br>
                             <b>Customer:</b> ${res.data.customer}<br>
-                            <b>Total:</b> Rp ${parseInt(res.data.total).toLocaleString('id-ID')}`,
+                            <b>Total:</b> Rp ${parseInt(res.data.total).toLocaleString('id-ID')}<br><br>
+                            <p class="mb-1"><small class="text-muted">QR Code Pesanan:</small></p>
+                            <img src="/qrcode/${res.data.order_code}"
+                                 alt="QR Code"
+                                 style="width:180px;height:180px;border:1px solid #eee;border-radius:8px;padding:6px;">`,
                 });
                 resetKeranjang();
             },
+
             onPending: function (result) {
                 Swal.fire({
                     icon:  'info',

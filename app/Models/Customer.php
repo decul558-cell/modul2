@@ -1,10 +1,17 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
-    protected $fillable = ['name', 'phone'];
+    protected $fillable = [
+        'name',
+        'phone',
+        'photo_blob',
+        'photo_path',
+    ];
 
     public function orders()
     {
