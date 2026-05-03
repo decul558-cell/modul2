@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
@@ -7,12 +9,14 @@ class Payment extends Model
     protected $fillable = [
         'order_id',
         'midtrans_order_id',
-        'amount',
-        'status',
         'transaction_id',
         'payment_type',
-        'midtrans_response',
+        'va_number',
+        'qr_code_url',
+        'amount',
+        'status',
         'paid_at',
+        'midtrans_response',
     ];
 
     protected $casts = [

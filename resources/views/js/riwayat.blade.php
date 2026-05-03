@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="container-fluid py-4">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold mb-0">📋 Riwayat Transaksi Lunas</h4>
         <a href="{{ route('pos.index') }}" class="btn btn-warning">
@@ -19,16 +18,16 @@
                 <span class="fw-bold">{{ $order->order_code }}</span>
                 <div>
                     @if($order->payment)
-                        <span class="badge bg-info me-1">
-                            {{ strtoupper(str_replace('_', ' ', $order->payment->payment_type ?? 'tunai')) }}
-                        </span>
+                    <span class="badge bg-info me-1">
+                        {{ strtoupper(str_replace('_', ' ', $order->payment->payment_type ?? 'tunai')) }}
+                    </span>
                     @endif
                     <span class="badge bg-success">LUNAS</span>
                 </div>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
                         <p class="mb-1">👤 <strong>{{ $order->customer->name }}</strong></p>
                         <ul class="mb-0 small text-muted">
                             @foreach($order->items as $item)
@@ -41,7 +40,18 @@
                             @endforeach
                         </ul>
                     </div>
-                    <div class="col-md-4 text-end">
+
+                    {{-- QR CODE --}}
+                    <div class="col-md-3 text-center">
+                        <img src="{{ route('qrcode.generate', $order->order_code) }}"
+                             alt="QR {{ $order->order_code }}"
+                             style="width: 100px; height: 100px;"
+                             title="QR Code: {{ $order->order_code }}">
+                        <br>
+                        <small class="text-muted">Scan QR</small>
+                    </div>
+
+                    <div class="col-md-3 text-end">
                         <p class="fw-bold text-danger fs-5 mb-1">
                             Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                         </p>
@@ -64,6 +74,5 @@
             {{ $orders->links() }}
         </div>
     @endif
-
 </div>
 @endsection

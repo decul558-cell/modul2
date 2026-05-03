@@ -55,12 +55,30 @@
             </a>
         </li>
 
-        {{-- TAG HARGA --}}
-        <li class="nav-item {{ request()->routeIs('barang.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('barang.index') }}">
+        {{-- TAG HARGA + BARCODE READER (Praktikum 1) --}}
+        <li class="nav-item {{ request()->routeIs('barang.*') || request()->routeIs('barcode.*') ? 'active' : '' }}">
+            <a class="nav-link" data-bs-toggle="collapse" href="#menuTagHarga"
+               aria-expanded="{{ request()->routeIs('barang.*') || request()->routeIs('barcode.*') ? 'true' : 'false' }}">
                 <span class="menu-title">Tag Harga</span>
+                <i class="menu-arrow"></i>
                 <i class="mdi mdi-tag-outline menu-icon"></i>
             </a>
+            <div class="collapse {{ request()->routeIs('barang.*') || request()->routeIs('barcode.*') ? 'show' : '' }}" id="menuTagHarga">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('barang.*') ? 'active' : '' }}"
+                           href="{{ route('barang.index') }}">
+                            Cetak Tag Harga
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('barcode.reader') ? 'active' : '' }}"
+                           href="{{ route('barcode.reader') }}">
+                            Barcode Reader
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
         {{-- TABEL BIASA --}}
@@ -116,6 +134,14 @@
             <a class="nav-link" href="{{ route('pos.riwayat') }}">
                 <span class="menu-title">Riwayat Transaksi</span>
                 <i class="mdi mdi-history menu-icon"></i>
+            </a>
+        </li>
+
+        {{-- VENDOR SCAN QR (Praktikum 2) --}}
+        <li class="nav-item {{ request()->routeIs('vendor.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('vendor.scan') }}">
+                <span class="menu-title">Vendor Scan QR</span>
+                <i class="mdi mdi-qrcode-scan menu-icon"></i>
             </a>
         </li>
 

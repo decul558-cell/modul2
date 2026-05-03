@@ -10,7 +10,9 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\WilayahController;
-use App\Http\Controllers\CustomerController; // ← SC3
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\BarcodeReaderController; // ← Praktikum 1
+use App\Http\Controllers\VendorScanController;    // ← Praktikum 2
 
 // =====================
 // AUTH
@@ -34,7 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
     Route::get('/profile', fn() => view('profile'))->name('profile');
 
+    // -------------------------
     // Barang
+    // -------------------------
     Route::get('/barang', [BarangController::class, 'index'])->name('barang.index');
     Route::post('/barang', [BarangController::class, 'store'])->name('barang.store');
     Route::put('/barang/{barang}', [BarangController::class, 'update'])->name('barang.update');
@@ -42,44 +46,84 @@ Route::middleware('auth')->group(function () {
     Route::post('/barang/cetak-pdf', [BarangController::class, 'cetakPdf'])->name('barang.cetakPdf');
     Route::post('/barang/cetak-pdf-barcode', [BarangController::class, 'cetakPdfBarcode'])->name('barang.cetakPdfBarcode');
 
+    // -------------------------
     // Kategori
+    // -------------------------
     Route::resource('kategori', KategoriController::class)->except('show');
 
+    // -------------------------
     // Buku
+    // -------------------------
     Route::resource('buku', BukuController::class)->except('show');
 
+    // -------------------------
     // POS
+    // -------------------------
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/bayar', [PosController::class, 'bayar'])->name('pos.bayar');
     Route::post('/pos/cari-barang', [PosController::class, 'cariBarang'])->name('pos.cari');
     Route::get('/pos/riwayat', [PosController::class, 'riwayat'])->name('pos.riwayat');
 
-    // QR Code Generator
+    // -------------------------
+    // QR Code Generator (inline, dari modul sebelumnya)
+    // -------------------------
     Route::get('/qrcode/{order_code}', function ($order_code) {
         return response(
             \SimpleSoftwareIO\QrCode\Facades\QrCode::size(200)->generate($order_code)
         )->header('Content-Type', 'image/svg+xml');
     })->name('qrcode.generate');
 
+    // -------------------------
     // PDF
+    // -------------------------
     Route::get('/pdf/sertifikat', [PdfController::class, 'sertifikat'])->name('pdf.sertifikat');
     Route::get('/pdf/undangan', [PdfController::class, 'undangan'])->name('pdf.undangan');
 
-    // Customer (SC3)
+    // -------------------------
+    // Customer (SC3 - Modul Kamera)
+    // -------------------------
     Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
     Route::get('/customer/tambah-1', [CustomerController::class, 'create1'])->name('customer.create1');
     Route::post('/customer/tambah-1', [CustomerController::class, 'store1'])->name('customer.store1');
     Route::get('/customer/tambah-2', [CustomerController::class, 'create2'])->name('customer.create2');
     Route::post('/customer/tambah-2', [CustomerController::class, 'store2'])->name('customer.store2');
 
+    // -------------------------
+    // Barcode Reader (Praktikum 1)
+    // -------------------------
+    // Halaman scan barcode dari label tag harga
+    Route::get('/barcode-reader', [BarcodeReaderController::class, 'index'])->name('barcode.reader');
+    // API: cari barang berdasarkan kode yang dibaca barcode
+    Route::get('/barcode-reader/cari/{kode}', [BarcodeReaderController::class, 'cariBarang'])->name('barcode.cari');
+
+    // -------------------------
+    // QR Code Reader - Customer (Praktikum 2)
+    // -------------------------
+    // Halaman sukses pembayaran + generate & simpan QR code
+    Route::get('/pos/sukses/{id_pesanan}', [PosController::class, 'paymentSuccess'])->name('pos.sukses');
+    // Halaman untuk customer mengakses kembali QR code pesanannya kapan saja
+    Route::get('/pesanan/{id}/qrcode', [PosController::class, 'lihatQrCode'])->name('pesanan.qrcode');
+
+    // -------------------------
+    // QR Code Reader - Vendor (Praktikum 2)
+    // -------------------------
+    // Halaman scan QR code dari customer
+    Route::get('/vendor/scan-qr', [VendorScanController::class, 'index'])->name('vendor.scan');
+    // API: cek detail pesanan berdasarkan id_pesanan dari QR code
+    Route::get('/vendor/scan-qr/cek/{id_pesanan}', [VendorScanController::class, 'cekPesanan'])->name('vendor.cekPesanan');
+
+    // -------------------------
     // JS Demo Pages
+    // -------------------------
     Route::view('/js-select', 'js.select')->name('js.select');
     Route::view('/js-tabel-biasa', 'js.tabel_biasa')->name('js.tabel_biasa');
     Route::view('/js-tabel-datatables', 'js.tabel_datatables')->name('js.tabel_datatables');
     Route::view('/js-wilayah-ajax', 'js.wilayah_ajax')->name('js.wilayah_ajax');
     Route::view('/js-wilayah-axios', 'js.wilayah_axios')->name('js.wilayah_axios');
 
+    // -------------------------
     // Wilayah API
+    // -------------------------
     Route::get('/api/provinsi', [WilayahController::class, 'provinsi'])->name('api.provinsi');
     Route::get('/api/kota/{id}', [WilayahController::class, 'kota'])->name('api.kota');
     Route::get('/api/kecamatan/{id}', [WilayahController::class, 'kecamatan'])->name('api.kecamatan');

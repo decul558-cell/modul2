@@ -9,20 +9,27 @@
                     <i class="mdi mdi-camera-plus me-2"></i>Tambah Customer 2 — Foto sebagai File
                 </div>
                 <div class="card-body">
+
                     @if($errors->any())
                         <div class="alert alert-danger">{{ $errors->first() }}</div>
                     @endif
+
+                    {{-- Preview Kamera --}}
                     <div class="mb-3 text-center">
                         <video id="video" autoplay playsinline
                                class="rounded-3 border w-100"
                                style="max-height:300px;background:#000;"></video>
                         <canvas id="canvas" style="display:none;"></canvas>
                     </div>
+
+                    {{-- Preview Foto --}}
                     <div class="mb-3 text-center" id="previewContainer" style="display:none;">
                         <img id="previewImg" src="" alt="preview"
                              class="rounded-3 border"
                              style="max-width:100%;max-height:250px;object-fit:cover;">
                     </div>
+
+                    {{-- Tombol Kamera --}}
                     <div class="d-flex gap-2 mb-4">
                         <button type="button" id="btnCapture" class="btn btn-success w-100">
                             <i class="mdi mdi-camera me-1"></i> Ambil Foto
@@ -32,14 +39,19 @@
                             <i class="mdi mdi-refresh me-1"></i> Ulangi
                         </button>
                     </div>
+
+                    {{-- Info perbedaan --}}
                     <div class="alert alert-info small mb-3">
                         <i class="mdi mdi-information me-1"></i>
                         <strong>Tambah Customer 2:</strong> Foto disimpan sebagai <strong>file .jpg</strong>
                         di storage, database hanya menyimpan <strong>path file</strong>-nya.
                     </div>
+
+                    {{-- Form --}}
                     <form action="{{ route('customer.store2') }}" method="POST" id="form2">
                         @csrf
                         <input type="hidden" name="photo" id="photoData">
+
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Nama Customer</label>
                             <input type="text" name="name" class="form-control"
@@ -50,10 +62,12 @@
                             <input type="text" name="phone" class="form-control"
                                    placeholder="Masukkan nomor telepon..." value="{{ old('phone') }}">
                         </div>
+
                         <button type="submit" id="btnSimpan" class="btn btn-success w-100" disabled>
                             <i class="mdi mdi-content-save me-1"></i> Simpan Customer
                         </button>
                     </form>
+
                     <a href="{{ route('customer.index') }}" class="btn btn-outline-secondary w-100 mt-2">
                         ← Kembali
                     </a>
@@ -75,24 +89,35 @@ const btnRetake   = document.getElementById('btnRetake');
 const btnSimpan   = document.getElementById('btnSimpan');
 const photoData   = document.getElementById('photoData');
 
+// Akses kamera
 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
     .then(stream => { video.srcObject = stream; })
-    .catch(err => { alert('Tidak dapat mengakses kamera: ' + err.message); });
+    .catch(err => {
+        alert('Tidak dapat mengakses kamera: ' + err.message);
+    });
 
+// Ambil foto
 btnCapture.addEventListener('click', function () {
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
+
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+    // Simpan base64 ke hidden input
+    // Controller akan decode & simpan sebagai file fisik
     photoData.value = dataUrl;
+
     previewImg.src = dataUrl;
     previewCont.style.display = 'block';
     video.style.display = 'none';
+
     btnCapture.style.display = 'none';
     btnRetake.style.display  = 'block';
     btnSimpan.disabled = false;
 });
 
+// Ulangi foto
 btnRetake.addEventListener('click', function () {
     photoData.value = '';
     previewCont.style.display = 'none';
