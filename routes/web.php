@@ -13,6 +13,7 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BarcodeReaderController; // ← Praktikum 1
 use App\Http\Controllers\VendorScanController;    // ← Praktikum 2
+use App\Http\Controllers\TokoController;          // ← Geolocation
 
 // =====================
 // AUTH
@@ -65,7 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos/riwayat', [PosController::class, 'riwayat'])->name('pos.riwayat');
 
     // -------------------------
-    // QR Code Generator (inline, dari modul sebelumnya)
+    // QR Code Generator
     // -------------------------
     Route::get('/qrcode/{order_code}', function ($order_code) {
         return response(
@@ -91,26 +92,31 @@ Route::middleware('auth')->group(function () {
     // -------------------------
     // Barcode Reader (Praktikum 1)
     // -------------------------
-    // Halaman scan barcode dari label tag harga
     Route::get('/barcode-reader', [BarcodeReaderController::class, 'index'])->name('barcode.reader');
-    // API: cari barang berdasarkan kode yang dibaca barcode
     Route::get('/barcode-reader/cari/{kode}', [BarcodeReaderController::class, 'cariBarang'])->name('barcode.cari');
 
     // -------------------------
     // QR Code Reader - Customer (Praktikum 2)
     // -------------------------
-    // Halaman sukses pembayaran + generate & simpan QR code
     Route::get('/pos/sukses/{id_pesanan}', [PosController::class, 'paymentSuccess'])->name('pos.sukses');
-    // Halaman untuk customer mengakses kembali QR code pesanannya kapan saja
     Route::get('/pesanan/{id}/qrcode', [PosController::class, 'lihatQrCode'])->name('pesanan.qrcode');
 
     // -------------------------
     // QR Code Reader - Vendor (Praktikum 2)
     // -------------------------
-    // Halaman scan QR code dari customer
     Route::get('/vendor/scan-qr', [VendorScanController::class, 'index'])->name('vendor.scan');
-    // API: cek detail pesanan berdasarkan id_pesanan dari QR code
     Route::get('/vendor/scan-qr/cek/{id_pesanan}', [VendorScanController::class, 'cekPesanan'])->name('vendor.cekPesanan');
+
+    // -------------------------
+    // Kunjungan Toko - Geolocation
+    // PENTING: route statik harus SEBELUM route dinamik /{id}
+    // -------------------------
+    Route::get('/toko', [TokoController::class, 'index'])->name('toko.index');
+    Route::post('/toko', [TokoController::class, 'store'])->name('toko.store');
+    Route::get('/toko/kunjungan', [TokoController::class, 'kunjungan'])->name('toko.kunjungan');
+    Route::get('/toko/cari/{barcode}', [TokoController::class, 'cariToko'])->name('toko.cari');
+    Route::post('/toko/kunjungan/simpan', [TokoController::class, 'simpanKunjungan'])->name('toko.simpanKunjungan');
+    Route::get('/toko/{id}/barcode', [TokoController::class, 'cetakBarcode'])->name('toko.barcode');
 
     // -------------------------
     // JS Demo Pages

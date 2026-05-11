@@ -55,7 +55,7 @@
             </a>
         </li>
 
-        {{-- TAG HARGA + BARCODE READER (Praktikum 1) --}}
+        {{-- TAG HARGA + BARCODE READER --}}
         <li class="nav-item {{ request()->routeIs('barang.*') || request()->routeIs('barcode.*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#menuTagHarga"
                aria-expanded="{{ request()->routeIs('barang.*') || request()->routeIs('barcode.*') ? 'true' : 'false' }}">
@@ -137,12 +137,38 @@
             </a>
         </li>
 
-        {{-- VENDOR SCAN QR (Praktikum 2) --}}
+        {{-- VENDOR SCAN QR --}}
         <li class="nav-item {{ request()->routeIs('vendor.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('vendor.scan') }}">
                 <span class="menu-title">Vendor Scan QR</span>
                 <i class="mdi mdi-qrcode-scan menu-icon"></i>
             </a>
+        </li>
+
+        {{-- KUNJUNGAN TOKO (Geolocation) --}}
+        <li class="nav-item {{ request()->routeIs('toko.*') ? 'active' : '' }}">
+            <a class="nav-link" data-bs-toggle="collapse" href="#menuToko"
+               aria-expanded="{{ request()->routeIs('toko.*') ? 'true' : 'false' }}">
+                <span class="menu-title">Kunjungan Toko</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi-store menu-icon"></i>
+            </a>
+            <div class="collapse {{ request()->routeIs('toko.*') ? 'show' : '' }}" id="menuToko">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('toko.index') ? 'active' : '' }}"
+                           href="{{ route('toko.index') }}">
+                            Data Toko
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('toko.kunjungan') ? 'active' : '' }}"
+                           href="{{ route('toko.kunjungan') }}">
+                            Kunjungan Toko
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
         {{-- CUSTOMER (SC3) --}}
